@@ -1,0 +1,49 @@
+graph LR
+    subgraph "Phase 1: Reception"
+        RX["📥 Transaction Received<br/>TX(Sender, Receiver, Amount)"]
+        VALIDATE_TX["✅ Validation<br/>- Ed25519 Signature<br/>- Nonce<br/>- Balance"]
+    end
+    
+    subgraph "Phase 2: Mempool"
+        MEMPOOL["📦 Mempool<br/>Transaction Queue"]
+        CONFLICT["⚠️ Conflict Detection<br/>Same Sender?"]
+        QUEUE["📋 Enqueue TX<br/>Order: Nonce"]
+    end
+    
+    subgraph "Phase 3: Block Proposal"
+        PROPOSE["👑 Leader Selects TXs<br/>Merkle Root = Hash(TX1..TXn)"]
+        PENDING["🔨 PendingBlock<br/>Assembling State"]
+    end
+    
+    subgraph "Phase 4: Consensus"
+        CONSENSUS["🗳️ BFT Consensus<br/>Voting and QC"]
+        COMMIT["✅ Block Committed<br/>Two-Chain Rule"]
+    end
+    
+    subgraph "Phase 5: Execution"
+        EXEC["⚡ Deterministic Execution<br/>For each TX: Apply(State)"]
+        STATE_UPDATE["🔄 Update State Root<br/>Hash(New State)"]
+        FINALIZE["✔️ TX Finalized<br/>Immutable and Confirmed"]
+    end
+    
+    RX --> VALIDATE_TX
+    VALIDATE_TX -->|Valid| MEMPOOL
+    VALIDATE_TX -->|Invalid| DROP["❌ Discard TX"]
+    
+    MEMPOOL --> CONFLICT
+    CONFLICT -->|Conflict| QUEUE
+    CONFLICT -->|No Conflict| QUEUE
+    
+    QUEUE --> PROPOSE
+    PROPOSE --> PENDING
+    PENDING --> CONSENSUS
+    CONSENSUS --> COMMIT
+    COMMIT --> EXEC
+    EXEC --> STATE_UPDATE
+    STATE_UPDATE --> FINALIZE
+    
+    style RX fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style MEMPOOL fill:#ffd43b,stroke:#f59f00,color:#000
+    style CONSENSUS fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style EXEC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style FINALIZE fill:#da77f2,stroke:#9c36b5,color:#fff

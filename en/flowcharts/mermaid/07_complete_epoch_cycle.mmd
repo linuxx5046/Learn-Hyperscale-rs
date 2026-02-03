@@ -1,0 +1,64 @@
+graph TD
+    START["🌟 Epoch N Start<br/>Validators: V1, V2, V3, V4<br/>f=1 (tolerates 1 failure)"] --> ROUND0["📍 Round 0"]
+    
+    ROUND0 --> LEADER0["👑 Leader = V1<br/>(Round 0 % 4 = 0)"]
+    
+    LEADER0 --> PROPOSE0["📝 V1 Proposes Block B0<br/>Merkle(TX1, TX2, TX3)"]
+    
+    PROPOSE0 --> VOTE0["🗳️ V1, V2, V3 Vote<br/>V4 Offline"]
+    
+    VOTE0 --> QC0["🎖️ QC0 Created<br/>3 Votes >= 2f+1 ✓"]
+    
+    QC0 --> ROUND1["📍 Round 1"]
+    
+    ROUND1 --> LEADER1["👑 Leader = V2<br/>(Round 1 % 4 = 1)"]
+    
+    LEADER1 --> PROPOSE1["📝 V2 Proposes Block B1<br/>Parent = QC0<br/>Merkle(TX4, TX5)"]
+    
+    PROPOSE1 --> VOTE1["🗳️ V1, V2, V4 Vote<br/>V3 Offline"]
+    
+    VOTE1 --> QC1["🎖️ QC1 Created<br/>3 Votes >= 2f+1 ✓"]
+    
+    QC1 --> COMMIT_CHECK1{"Two-Chain Rule?<br/>QC1.Parent.Parent<br/>== Commit?"}
+    
+    COMMIT_CHECK1 -->|No| ROUND2["📍 Round 2"]
+    
+    ROUND2 --> LEADER2["👑 Leader = V3<br/>(Round 2 % 4 = 2)"]
+    
+    LEADER2 --> PROPOSE2["📝 V3 Proposes Block B2<br/>Parent = QC1<br/>Merkle(TX6, TX7, TX8)"]
+    
+    PROPOSE2 --> VOTE2["🗳️ V1, V2, V3 Vote<br/>V4 Offline"]
+    
+    VOTE2 --> QC2["🎖️ QC2 Created<br/>3 Votes >= 2f+1 ✓"]
+    
+    QC2 --> COMMIT_CHECK2{"Two-Chain Rule?<br/>QC2.Parent.Parent<br/>== Commit?"}
+    
+    COMMIT_CHECK2 -->|Yes| COMMIT["✅ Block B0 Committed!<br/>Execute TX1, TX2, TX3"]
+    
+    COMMIT --> EXEC["⚡ Update State Root<br/>Hash(New State)"]
+    
+    EXEC --> ROUND3["📍 Round 3"]
+    
+    ROUND3 --> LEADER3["👑 Leader = V4<br/>(Round 3 % 4 = 3)"]
+    
+    LEADER3 --> PROPOSE3["📝 V4 Proposes Block B3<br/>Parent = QC2"]
+    
+    PROPOSE3 --> VOTE3["🗳️ V1, V2, V3 Vote<br/>V4 Offline"]
+    
+    VOTE3 --> QC3["🎖️ QC3 Created"]
+    
+    QC3 --> EPOCH_CHECK{"Committed Blocks<br/>>= Threshold?<br/>Ex: 3 blocks"}
+    
+    EPOCH_CHECK -->|No| ROUND4["📍 Round 4<br/>Continue..."]
+    ROUND4 --> LEADER0
+    
+    EPOCH_CHECK -->|Yes| NEW_EPOCH["🌟 New Epoch N+1<br/>Round = 0<br/>Validators Updated"]
+    
+    NEW_EPOCH --> END["🏁 Complete Cycle"]
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style QC0 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style QC1 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style QC2 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style COMMIT fill:#51cf66,stroke:#2f9e44,color:#fff
+    style NEW_EPOCH fill:#da77f2,stroke:#9c36b5,color:#fff

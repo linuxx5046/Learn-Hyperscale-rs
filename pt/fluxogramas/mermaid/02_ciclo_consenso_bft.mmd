@@ -1,0 +1,62 @@
+graph TD
+    START["🚀 Início da Época  
+Epoch = N"] --> ROUND["📍 Round = 0"]
+    
+    ROUND --> LEADER["👑 Eleição de Líder  
+Leader = Validator[Round % N]"]
+    
+    LEADER --> PROPOSE["📝 Líder Propõe Bloco  
+Block(Epoch, Round, Txs)"]
+    
+    PROPOSE --> RECEIVE["📥 Nós Recebem Proposta"]
+    
+    RECEIVE --> VALIDATE["✅ Validação do Bloco  
+- Assinatura do Líder  
+- Merkle Root  
+- State Root"]
+    
+    VALIDATE -->|Válido| VOTE["🗳️ Nó Vota no Bloco  
+Vote(Block, Validator)"]
+    VALIDATE -->|Inválido| SKIP["⏭️ Pula para Próximo Round"]
+    
+    VOTE --> COLLECT["📊 Coleta de Votos  
+VoteSet acumula votos"]
+    
+    COLLECT --> CHECK_QC{"2f+1 Votos  
+Recebidos?"}
+    
+    CHECK_QC -->|Não| TIMEOUT["⏱️ Timeout  
+Aguarda mais votos"]
+    TIMEOUT --> SKIP
+    
+    CHECK_QC -->|Sim| AGGREGATE["🔗 Agregação de Assinaturas  
+BLS12-381 Signature Aggregation"]
+    
+    AGGREGATE --> CREATE_QC["🎖️ Cria Quorum Certificate  
+QC(Block, Signers, AggSig)"]
+    
+    CREATE_QC --> COMMIT{"Block Commitado?  
+Two-Chain Rule"}
+    
+    COMMIT -->|Não| NEXT_ROUND["🔄 Próximo Round  
+Round += 1"]
+    COMMIT -->|Sim| EXECUTE["⚡ Executa Transações  
+Atualiza State Root"]
+    
+    EXECUTE --> EPOCH_CHECK{"Fim da Época?  
+Blocos >= Threshold"}
+    
+    EPOCH_CHECK -->|Não| NEXT_ROUND
+    EPOCH_CHECK -->|Sim| NEW_EPOCH["🌟 Nova Época  
+Epoch += 1  
+Round = 0"]
+    
+    NEW_EPOCH --> ROUND
+    NEXT_ROUND --> LEADER
+    SKIP --> LEADER
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style VOTE fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style CREATE_QC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style EXECUTE fill:#ffd43b,stroke:#f59f00,color:#000
+    style NEW_EPOCH fill:#da77f2,stroke:#9c36b5,color:#fff

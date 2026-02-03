@@ -1,0 +1,39 @@
+graph TD
+    START["⏱️ Round Timeout<br/>Leader Does Not Propose"] --> DETECT["🚨 Detect Failure<br/>Waited X seconds"]
+    
+    DETECT --> UNLOCK["🔓 Unlock Vote<br/>Remove Vote Lock"]
+    
+    UNLOCK --> INCREASE_VIEW["📈 Increment View<br/>View += 1<br/>Round += 1"]
+    
+    INCREASE_VIEW --> NEW_LEADER["👑 New Leader<br/>Leader = Validator[Round % N]"]
+    
+    NEW_LEADER --> LEADER_CHECK{"New Leader<br/>is Honest?"}
+    
+    LEADER_CHECK -->|No| TIMEOUT_AGAIN["⏱️ Timeout Again<br/>Repeat View Change"]
+    TIMEOUT_AGAIN --> INCREASE_VIEW
+    
+    LEADER_CHECK -->|Yes| PROPOSE_NEW["📝 New Leader Proposes<br/>Block with HighQC"]
+    
+    PROPOSE_NEW --> SYNC["🔄 Synchronization<br/>Nodes Receive Proposal"]
+    
+    SYNC --> VALIDATE["✅ Validate Block<br/>- Valid Parent QC<br/>- Signature OK"]
+    
+    VALIDATE -->|Invalid| REJECT["❌ Rejects<br/>New Timeout"]
+    REJECT --> INCREASE_VIEW
+    
+    VALIDATE -->|Valid| VOTE_NEW["🗳️ Vote on New Block"]
+    
+    VOTE_NEW --> COLLECT["📊 Collect Votes<br/>2f+1 Required"]
+    
+    COLLECT --> QC_NEW["🎖️ QC Created<br/>System Recovered"]
+    
+    QC_NEW --> PROGRESS["✅ System Progresses<br/>Consensus Restored"]
+    
+    PROGRESS --> END["🏁 Back to Normal"]
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style DETECT fill:#ffd43b,stroke:#f59f00,color:#000
+    style UNLOCK fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style NEW_LEADER fill:#51cf66,stroke:#2f9e44,color:#fff
+    style QC_NEW fill:#da77f2,stroke:#9c36b5,color:#fff
+    style PROGRESS fill:#9c36b5,stroke:#6c2a8f,color:#fff

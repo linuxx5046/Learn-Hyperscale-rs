@@ -1,0 +1,44 @@
+graph TD
+    START["🚀 Epoch Start<br/>Epoch = N"] --> ROUND["📍 Round = 0"]
+    
+    ROUND --> LEADER["👑 Leader Election<br/>Leader = Validator[Round % N]"]
+    
+    LEADER --> PROPOSE["📝 Leader Proposes Block<br/>Block(Epoch, Round, Txs)"]
+    
+    PROPOSE --> RECEIVE["📥 Nodes Receive Proposal"]
+    
+    RECEIVE --> VALIDATE["✅ Block Validation<br/>- Leader Signature<br/>- Merkle Root<br/>- State Root"]
+    
+    VALIDATE -->|Valid| VOTE["🗳️ Node Votes on Block<br/>Vote(Block, Validator)"]
+    VALIDATE -->|Invalid| SKIP["⏭️ Skip to Next Round"]
+    
+    VOTE --> COLLECT["📊 Vote Collection<br/>VoteSet accumulates votes"]
+    
+    COLLECT --> CHECK_QC{"2f+1 Votes<br/>Received?"}
+    
+    CHECK_QC -->|No| TIMEOUT["⏱️ Timeout<br/>Waiting for more votes"]
+    TIMEOUT --> SKIP
+    
+    CHECK_QC -->|Yes| AGGREGATE["🔗 Signature Aggregation<br/>BLS12-381 Aggregation"]
+    
+    AGGREGATE --> CREATE_QC["🎖️ Create Quorum Certificate<br/>QC(Block, Signers, AggSig)"]
+    
+    CREATE_QC --> COMMIT{"Block Committed?<br/>Two-Chain Rule"}
+    
+    COMMIT -->|No| NEXT_ROUND["🔄 Next Round<br/>Round += 1"]
+    COMMIT -->|Yes| EXECUTE["⚡ Execute Transactions<br/>Update State Root"]
+    
+    EXECUTE --> EPOCH_CHECK{"Epoch End?<br/>Blocks >= Threshold"}
+    
+    EPOCH_CHECK -->|No| NEXT_ROUND
+    EPOCH_CHECK -->|Yes| NEW_EPOCH["🌟 New Epoch<br/>Epoch += 1<br/>Round = 0"]
+    
+    NEW_EPOCH --> ROUND
+    NEXT_ROUND --> LEADER
+    SKIP --> LEADER
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style VOTE fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style CREATE_QC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style EXECUTE fill:#ffd43b,stroke:#f59f00,color:#000
+    style NEW_EPOCH fill:#da77f2,stroke:#9c36b5,color:#fff

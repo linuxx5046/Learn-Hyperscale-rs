@@ -1,0 +1,59 @@
+graph TD
+    START["🚀 Block Proposed<br/>Block(Epoch, Round, TXs)"] --> RECEIVE["📥 Node Receives Proposal"]
+    
+    RECEIVE --> VALIDATE["✅ Validate Block<br/>- Leader Signature<br/>- Merkle Root<br/>- State Root<br/>- Parent QC"]
+    
+    VALIDATE -->|Invalid| REJECT["❌ Rejects<br/>Does not vote"]
+    
+    VALIDATE -->|Valid| LOCK_CHECK{"Block Locked?<br/>Vote Locking Rule"}
+    
+    LOCK_CHECK -->|Yes| LOCKED["🔒 Verify Lock<br/>QC.Round > Locked.Round?"]
+    LOCKED -->|No| REJECT
+    LOCKED -->|Yes| CREATE_VOTE
+    
+    LOCK_CHECK -->|No| CREATE_VOTE["🗳️ Create Vote<br/>Vote(BlockHash, Validator, Sig)"]
+    
+    CREATE_VOTE --> BROADCAST["📢 Broadcast Vote<br/>Send to all"]
+    
+    BROADCAST --> COLLECT["📊 Vote Collection<br/>VoteSet at Leader"]
+    
+    COLLECT --> ACCUMULATE["📈 Accumulate Votes<br/>VoteSet.add(Vote)"]
+    
+    ACCUMULATE --> COUNT{"Votes >= 2f+1?<br/>Quorum Reached?"}
+    
+    COUNT -->|No| WAIT["⏳ Wait for More Votes"]
+    WAIT --> ACCUMULATE
+    
+    COUNT -->|Yes| VERIFY["✅ Verify Signatures<br/>Batch Verification"]
+    
+    VERIFY -->|Fails| REJECT
+    VERIFY -->|Success| AGGREGATE["🔗 Aggregate Signatures<br/>BLS12-381 Aggregation"]
+    
+    AGGREGATE --> CREATE_QC["🎖️ Create Quorum Certificate<br/>QC{<br/>  BlockHash,<br/>  Height,<br/>  AggregatedSig,<br/>  SignerBitfield<br/>}"]
+    
+    CREATE_QC --> BROADCAST_QC["📢 Broadcast QC<br/>Send to all"]
+    
+    BROADCAST_QC --> RECEIVE_QC["📥 Node Receives QC"]
+    
+    RECEIVE_QC --> VALIDATE_QC["✅ Validate QC<br/>- Verify Aggregated Signature<br/>- Verify Quorum (2f+1)"]
+    
+    VALIDATE_QC -->|Invalid| REJECT_QC["❌ Rejects QC"]
+    
+    VALIDATE_QC -->|Valid| UPDATE_STATE["🔄 Update State<br/>HighQC = QC<br/>Locked = QC"]
+    
+    UPDATE_STATE --> COMMIT_CHECK{"Two-Chain Rule?<br/>QC.Parent.Parent == Commit?"}
+    
+    COMMIT_CHECK -->|No| WAIT_COMMIT["⏳ Wait for Next QC"]
+    COMMIT_CHECK -->|Yes| COMMIT["✅ Commit Block<br/>Execute Transactions<br/>Final State Root"]
+    
+    COMMIT --> FINALIZE["✔️ Block Finalized<br/>Immutable"]
+    
+    REJECT --> END["🏁 End"]
+    REJECT_QC --> END
+    FINALIZE --> END
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style CREATE_VOTE fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style CREATE_QC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style COMMIT fill:#ffd43b,stroke:#f59f00,color:#000
+    style FINALIZE fill:#da77f2,stroke:#9c36b5,color:#fff

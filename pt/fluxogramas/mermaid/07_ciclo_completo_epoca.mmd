@@ -1,0 +1,94 @@
+graph TD
+    START["🌟 Início da Época N  
+Validadores: V1, V2, V3, V4  
+f=1 (tolera 1 falha)"] --> ROUND0["📍 Round 0"]
+    
+    ROUND0 --> LEADER0["👑 Líder = V1  
+(Round 0 % 4 = 0)"]
+    
+    LEADER0 --> PROPOSE0["📝 V1 Propõe Bloco B0  
+Merkle(TX1, TX2, TX3)"]
+    
+    PROPOSE0 --> VOTE0["🗳️ V1, V2, V3 Votam  
+V4 Offline"]
+    
+    VOTE0 --> QC0["🎖️ QC0 Criado  
+3 Votos >= 2f+1 ✓"]
+    
+    QC0 --> ROUND1["📍 Round 1"]
+    
+    ROUND1 --> LEADER1["👑 Líder = V2  
+(Round 1 % 4 = 1)"]
+    
+    LEADER1 --> PROPOSE1["📝 V2 Propõe Bloco B1  
+Parent = QC0  
+Merkle(TX4, TX5)"]
+    
+    PROPOSE1 --> VOTE1["🗳️ V1, V2, V4 Votam  
+V3 Offline"]
+    
+    VOTE1 --> QC1["🎖️ QC1 Criado  
+3 Votos >= 2f+1 ✓"]
+    
+    QC1 --> COMMIT_CHECK1{"Two-Chain Rule?  
+QC1.Parent.Parent  
+== Commit?"}
+    
+    COMMIT_CHECK1 -->|Não| ROUND2["📍 Round 2"]
+    
+    ROUND2 --> LEADER2["👑 Líder = V3  
+(Round 2 % 4 = 2)"]
+    
+    LEADER2 --> PROPOSE2["📝 V3 Propõe Bloco B2  
+Parent = QC1  
+Merkle(TX6, TX7, TX8)"]
+    
+    PROPOSE2 --> VOTE2["🗳️ V1, V2, V3 Votam  
+V4 Offline"]
+    
+    VOTE2 --> QC2["🎖️ QC2 Criado  
+3 Votos >= 2f+1 ✓"]
+    
+    QC2 --> COMMIT_CHECK2{"Two-Chain Rule?  
+QC2.Parent.Parent  
+== Commit?"}
+    
+    COMMIT_CHECK2 -->|Sim| COMMIT["✅ Bloco B0 Commitado!  
+Executa TX1, TX2, TX3"]
+    
+    COMMIT --> EXEC["⚡ Atualiza State Root  
+Hash(Novo Estado)"]
+    
+    EXEC --> ROUND3["📍 Round 3"]
+    
+    ROUND3 --> LEADER3["👑 Líder = V4  
+(Round 3 % 4 = 3)"]
+    
+    LEADER3 --> PROPOSE3["📝 V4 Propõe Bloco B3  
+Parent = QC2"]
+    
+    PROPOSE3 --> VOTE3["🗳️ V1, V2, V3 Votam  
+V4 Offline"]
+    
+    VOTE3 --> QC3["🎖️ QC3 Criado"]
+    
+    QC3 --> EPOCH_CHECK{"Blocos Commitados  
+>= Threshold?  
+Ex: 3 blocos"}
+    
+    EPOCH_CHECK -->|Não| ROUND4["📍 Round 4  
+Continua..."]
+    ROUND4 --> LEADER0
+    
+    EPOCH_CHECK -->|Sim| NEW_EPOCH["🌟 Nova Época N+1  
+Round = 0  
+Validadores Atualizados"]
+    
+    NEW_EPOCH --> END["🏁 Ciclo Completo"]
+    
+    style START fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style QC0 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style QC1 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style QC2 fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style COMMIT fill:#51cf66,stroke:#2f9e44,color:#fff
+    style NEW_EPOCH fill:#da77f2,stroke:#9c36b5,color:#fff

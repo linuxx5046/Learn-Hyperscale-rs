@@ -1,0 +1,48 @@
+graph TB
+    subgraph "Network Layer"
+        NET["🌐 P2P Network"]
+    end
+    
+    subgraph "Node Layer"
+        NODE["🖥️ NodeStateMachine"]
+    end
+    
+    subgraph "Main Components"
+        BFT["⚙️ BFT State Machine<br/>HotStuff-2 Consensus"]
+        EXEC["⚡ Execution Engine<br/>Transaction Execution"]
+        MEMPOOL["📦 Mempool<br/>Transaction Pool"]
+        PROV["🔄 Provisioning<br/>Block Preparation"]
+        LIVELOCK["🔁 Livelock Prevention<br/>Cycle Detection"]
+    end
+    
+    subgraph "Data Layer"
+        TYPES["📋 Types & Structures<br/>Hash, Block, Vote, QC"]
+        CRYPTO["🔐 Cryptography<br/>BLS12-381, Blake3, Ed25519"]
+        STORAGE["💾 Storage<br/>State Root, Ledger"]
+    end
+    
+    subgraph "Production Layer"
+        PROD["🏭 Production Runtime<br/>Thread Pool Specialization"]
+    end
+    
+    NET -->|Events| NODE
+    NODE -->|Coordinates| BFT
+    NODE -->|Coordinates| EXEC
+    NODE -->|Coordinates| MEMPOOL
+    NODE -->|Coordinates| PROV
+    NODE -->|Coordinates| LIVELOCK
+    
+    BFT -->|Uses| TYPES
+    EXEC -->|Uses| TYPES
+    MEMPOOL -->|Uses| TYPES
+    
+    TYPES -->|Validates| CRYPTO
+    CRYPTO -->|Protects| STORAGE
+    
+    PROD -->|Executes| NODE
+    
+    style NODE fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style BFT fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style EXEC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style MEMPOOL fill:#ffd43b,stroke:#f59f00,color:#000
+    style PROD fill:#da77f2,stroke:#9c36b5,color:#fff

@@ -1,0 +1,63 @@
+graph LR
+    subgraph "Fase 1: Recepção"
+        RX["📥 Transação Recebida  
+TX(Sender, Receiver, Amount)"]
+        VALIDATE_TX["✅ Validação  
+- Assinatura Ed25519  
+- Nonce  
+- Saldo"]
+    end
+    
+    subgraph "Fase 2: Mempool"
+        MEMPOOL["📦 Mempool  
+Fila de Transações"]
+        CONFLICT["⚠️ Detecção de Conflito  
+Mesmo Sender?"]
+        QUEUE["📋 Enfileira TX  
+Ordem: Nonce"]
+    end
+    
+    subgraph "Fase 3: Proposição de Bloco"
+        PROPOSE["👑 Líder Seleciona TXs  
+Merkle Root = Hash(TX1..TXn)"]
+        PENDING["🔨 PendingBlock  
+Assembling State"]
+    end
+    
+    subgraph "Fase 4: Consenso"
+        CONSENSUS["🗳️ Consenso BFT  
+Votação e QC"]
+        COMMIT["✅ Bloco Commitado  
+Two-Chain Rule"]
+    end
+    
+    subgraph "Fase 5: Execução"
+        EXEC["⚡ Execução Determinística  
+Para cada TX: Apply(State)"]
+        STATE_UPDATE["🔄 Atualiza State Root  
+Hash(Novo Estado)"]
+        FINALIZE["✔️ TX Finalizada  
+Imutável e Confirmada"]
+    end
+    
+    RX --> VALIDATE_TX
+    VALIDATE_TX -->|Válida| MEMPOOL
+    VALIDATE_TX -->|Inválida| DROP["❌ Descarta TX"]
+    
+    MEMPOOL --> CONFLICT
+    CONFLICT -->|Conflito| QUEUE
+    CONFLICT -->|Sem Conflito| QUEUE
+    
+    QUEUE --> PROPOSE
+    PROPOSE --> PENDING
+    PENDING --> CONSENSUS
+    CONSENSUS --> COMMIT
+    COMMIT --> EXEC
+    EXEC --> STATE_UPDATE
+    STATE_UPDATE --> FINALIZE
+    
+    style RX fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style MEMPOOL fill:#ffd43b,stroke:#f59f00,color:#000
+    style CONSENSUS fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style EXEC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style FINALIZE fill:#da77f2,stroke:#9c36b5,color:#fff

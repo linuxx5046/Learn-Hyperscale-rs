@@ -1,0 +1,57 @@
+graph TB
+    subgraph "Camada de Rede"
+        NET["🌐 Rede P2P"]
+    end
+    
+    subgraph "Camada de Nó"
+        NODE["🖥️ NodeStateMachine"]
+    end
+    
+    subgraph "Componentes Principais"
+        BFT["⚙️ BFT State Machine  
+Consenso HotStuff-2"]
+        EXEC["⚡ Execution Engine  
+Execução de Transações"]
+        MEMPOOL["📦 Mempool  
+Pool de Transações"]
+        PROV["🔄 Provisioning  
+Preparação de Blocos"]
+        LIVELOCK["🔁 Livelock Prevention  
+Detecção de Ciclos"]
+    end
+    
+    subgraph "Camada de Dados"
+        TYPES["📋 Types & Structures  
+Hash, Block, Vote, QC"]
+        CRYPTO["🔐 Cryptography  
+BLS12-381, Blake3, Ed25519"]
+        STORAGE["💾 Storage  
+State Root, Ledger"]
+    end
+    
+    subgraph "Camada de Produção"
+        PROD["🏭 Production Runtime  
+Thread Pool Specialization"]
+    end
+    
+    NET -->|Eventos| NODE
+    NODE -->|Coordena| BFT
+    NODE -->|Coordena| EXEC
+    NODE -->|Coordena| MEMPOOL
+    NODE -->|Coordena| PROV
+    NODE -->|Coordena| LIVELOCK
+    
+    BFT -->|Usa| TYPES
+    EXEC -->|Usa| TYPES
+    MEMPOOL -->|Usa| TYPES
+    
+    TYPES -->|Valida| CRYPTO
+    CRYPTO -->|Protege| STORAGE
+    
+    PROD -->|Executa| NODE
+    
+    style NODE fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style BFT fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style EXEC fill:#51cf66,stroke:#2f9e44,color:#fff
+    style MEMPOOL fill:#ffd43b,stroke:#f59f00,color:#000
+    style PROD fill:#da77f2,stroke:#9c36b5,color:#fff

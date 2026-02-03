@@ -1,0 +1,64 @@
+graph TB
+    subgraph "Event Input"
+        EVENT_NETWORK["🌐 Network Event<br/>Proposal, Vote, QC"]
+        EVENT_TIMER["⏱️ Timer Event<br/>Round Timeout"]
+        EVENT_TX["📝 TX Event<br/>New Transaction"]
+    end
+    
+    subgraph "NodeStateMachine"
+        DISPATCH["🎯 Event Dispatcher<br/>Routes to components"]
+        
+        subgraph "Internal Components"
+            BFT_STATE["⚙️ BFT State<br/>Epoch, Round, View"]
+            EXEC_STATE["⚡ Execution State<br/>Account State"]
+            MEMPOOL_STATE["📦 Mempool State<br/>Pending Transactions"]
+            PROV_STATE["🔄 Provisioning State<br/>Assembling Blocks"]
+            LIVELOCK_STATE["🔁 Livelock State<br/>Cycle Detection"]
+        end
+        
+        PROCESS["🔄 Process Event<br/>Handle(Event) → Actions"]
+    end
+    
+    subgraph "Generated Actions"
+        ACTION_VOTE["🗳️ Action: Vote<br/>Send vote to network"]
+        ACTION_PROPOSE["📝 Action: Propose<br/>Leader proposes block"]
+        ACTION_EXEC["⚡ Action: Execute<br/>Execute transactions"]
+        ACTION_BROADCAST["📢 Action: Broadcast<br/>Send P2P message"]
+    end
+    
+    subgraph "Output"
+        OUTPUT["📤 Event Output<br/>Update local state"]
+    end
+    
+    EVENT_NETWORK --> DISPATCH
+    EVENT_TIMER --> DISPATCH
+    EVENT_TX --> DISPATCH
+    
+    DISPATCH --> BFT_STATE
+    DISPATCH --> EXEC_STATE
+    DISPATCH --> MEMPOOL_STATE
+    DISPATCH --> PROV_STATE
+    DISPATCH --> LIVELOCK_STATE
+    
+    BFT_STATE --> PROCESS
+    EXEC_STATE --> PROCESS
+    MEMPOOL_STATE --> PROCESS
+    PROV_STATE --> PROCESS
+    LIVELOCK_STATE --> PROCESS
+    
+    PROCESS --> ACTION_VOTE
+    PROCESS --> ACTION_PROPOSE
+    PROCESS --> ACTION_EXEC
+    PROCESS --> ACTION_BROADCAST
+    
+    ACTION_VOTE --> OUTPUT
+    ACTION_PROPOSE --> OUTPUT
+    ACTION_EXEC --> OUTPUT
+    ACTION_BROADCAST --> OUTPUT
+    
+    OUTPUT -->|Feedback| DISPATCH
+    
+    style DISPATCH fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style PROCESS fill:#4c6ef5,stroke:#1971c2,color:#fff
+    style ACTION_VOTE fill:#51cf66,stroke:#2f9e44,color:#fff
+    style ACTION_EXEC fill:#ffd43b,stroke:#f59f00,color:#000
